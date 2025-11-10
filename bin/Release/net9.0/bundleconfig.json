@@ -1,0 +1,34 @@
+[
+  {
+    "outputFileName": "wwwroot/css/bundle.min.css",
+    "inputFiles": [
+      "wwwroot/css/variables.css",
+      "wwwroot/css/base.css",
+      "wwwroot/css/layout.css",
+      "wwwroot/css/sidebar.css",
+      "wwwroot/css/components.css",
+      "wwwroot/css/utilities.css",
+      "wwwroot/css/responsive.css",
+      "wwwroot/css/special.css",
+      "wwwroot/css/views.css",
+      "wwwroot/css/modern.css"
+    ],
+    "minify": {
+      "enabled": true,
+      "commentMode": "none"
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/bundle.min.js",
+    "inputFiles": [
+      "wwwroot/js/site.js",
+      "wwwroot/js/modern.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  }
+]
+

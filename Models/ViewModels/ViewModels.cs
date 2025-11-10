@@ -43,6 +43,7 @@ namespace Yoklama.Models.ViewModels
         public string FullName { get; set; } = string.Empty;
         public string StudentNumber { get; set; } = string.Empty;
         public bool IsActive { get; set; }
+        public string GroupName { get; set; } = string.Empty;
     }
 
     public class LessonVm
@@ -193,11 +194,6 @@ namespace Yoklama.Models.ViewModels
     {
         public List<StudentListItemVm> Students { get; set; } = new();
         public List<GroupSelectItemVm> Groups { get; set; } = new();
-        public Guid? SelectedGroupId { get; set; }
-        public string? Search { get; set; }
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-        public int TotalCount { get; set; }
         
         // İstatistikler
         public int TotalStudentsCount { get; set; }
@@ -348,9 +344,7 @@ namespace Yoklama.Models.ViewModels
     {
         public List<ScheduleDayVm> Days { get; set; } = new();
         public List<Group> Groups { get; set; } = new();
-        public Guid? SelectedGroupId { get; set; }
         public bool IsAdmin { get; set; }
-        public bool HasAnyFilters { get; set; }
     }
 
     public class ScheduleDayVm

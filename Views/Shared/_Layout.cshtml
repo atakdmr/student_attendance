@@ -1,10 +1,12 @@
 ﻿﻿@using Microsoft.AspNetCore.Http
-@using Yoklama.Data
 @inject IHttpContextAccessor HttpContextAccessor
+<<<<<<< HEAD
 @inject AppDbContext Db
 @{
     // (Removed sidebar role subtitle - navigation sections are now role-specific below)
 }
+=======
+>>>>>>> e72c5c9fb8f4b62db6fb8792aa2d6c19ddd4345d
 <!DOCTYPE html>
 <html lang="tr">
 
@@ -26,16 +28,25 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <!-- Custom Styles - Modular CSS -->
-    <link rel="stylesheet" href="~/css/variables.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/sidebar.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/components.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/utilities.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/special.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/views.css" asp-append-version="true" />
+    <!-- ✅ OPTIMIZATION: Bundled & minified CSS (Development'ta ayrı dosyalar, Production'da bundle) -->
+    @if (Context.Request.Host.Host == "localhost" || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+    {
+        <!-- Development: Ayrı CSS dosyaları (debug için) -->
+        <link rel="stylesheet" href="~/css/variables.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/sidebar.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/components.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/utilities.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/special.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/views.css" asp-append-version="true" />
+    }
+    else
+    {
+        <!-- Production: Bundled & minified CSS -->
+        <link rel="stylesheet" href="~/css/bundle.min.css" asp-append-version="true" />
+    }
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -390,8 +401,19 @@
     <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/modern.js" asp-append-version="true"></script>
+    
+    <!-- ✅ OPTIMIZATION: Bundled & minified JS (Development'ta ayrı dosyalar, Production'da bundle) -->
+    @if (Context.Request.Host.Host == "localhost" || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+    {
+        <!-- Development: Ayrı JS dosyaları (debug için) -->
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        <script src="~/js/modern.js" asp-append-version="true"></script>
+    }
+    else
+    {
+        <!-- Production: Bundled & minified JS -->
+        <script src="~/js/bundle.min.js" asp-append-version="true"></script>
+    }
 
     <!-- Mobil Geri Butonu JavaScript -->
     <script>

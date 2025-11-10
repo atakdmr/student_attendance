@@ -23,7 +23,7 @@ namespace Yoklama.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(Guid? groupId = null)
+        public async Task<IActionResult> Index()
         {
             var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (!Guid.TryParse(userIdStr, out Guid currentUserId))
@@ -39,25 +39,19 @@ namespace Yoklama.Controllers
             {
                 query = query.Where(s => s.TeacherId == currentUserId);
             }
-            else if (groupId.HasValue)
-            {
-                // Admin için grup filtreleme
-                query = query.Where(s => s.GroupId == groupId.Value);
-            }
 
+            // Tüm session'ları yükle (filtreleme client-side yapılacak)
             var sessions = await query
                 .Include(s => s.Lesson)
                 .Include(s => s.Group)
                 .Include(s => s.Teacher)
+                .OrderByDescending(s => s.ScheduledAt)
                 .ToListAsync();
-
-            sessions = sessions.OrderByDescending(s => s.ScheduledAt).ToList();
 
             // Admin için grup listesi
             var groups = isAdmin ? await _db.Groups.OrderBy(g => g.Name).ToListAsync() : new List<Group>();
 
             ViewBag.Groups = groups;
-            ViewBag.SelectedGroupId = groupId;
             ViewBag.IsAdmin = isAdmin;
 
             return View(sessions);
@@ -159,19 +153,24 @@ namespace Yoklama.Controllers
                 ? new DateTimeOffset(to.Value, localOffset)
                 : DateTimeOffset.Now;
 
+            var studentIds = group.Students.Select(s => s.Id).ToList();
+            var allAttendanceRecords = await _db.AttendanceRecords
+                .Include(ar => ar.Session)
+                .Where(ar => studentIds.Contains(ar.StudentId) 
+                          && ar.Session.ScheduledAt >= fromDate
+                          && ar.Session.ScheduledAt < toDate.AddDays(1))
+                .ToListAsync();
+
+            // Kayıtları öğrenciye göre grupla
+            var recordsByStudent = allAttendanceRecords
+                .GroupBy(ar => ar.StudentId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             var studentSummaries = new List<StudentAttendanceSummaryVm>();
 
             foreach (var student in group.Students)
             {
-                var attendanceRecords = await _db.AttendanceRecords
-    .Include(ar => ar.Session)
-    .Where(ar => ar.StudentId == student.Id)
-    .ToListAsync(); // tüm kayıtları async olarak getir
-                attendanceRecords = attendanceRecords
-                    .Where(ar => ar.Session.ScheduledAt >= fromDate
-                              && ar.Session.ScheduledAt < toDate.AddDays(1))
-                    .ToList();
-
+                var attendanceRecords = recordsByStudent.GetValueOrDefault(student.Id) ?? new List<AttendanceRecord>();
 
                 studentSummaries.Add(new StudentAttendanceSummaryVm
                 {
@@ -183,12 +182,12 @@ namespace Yoklama.Controllers
             var vm = new GroupReportVm
             {
                 Group = group,
-                FromDate = fromDate.DateTime,   // veya fromDate.LocalDateTime
-                ToDate = toDate.DateTime,       // veya toDate.LocalDateTime
+                FromDate = fromDate.DateTime,
+                ToDate = toDate.DateTime,
                 StudentSummaries = studentSummaries
-        .OrderBy(s => s.Student.LastName)
-        .ThenBy(s => s.Student.FirstName)
-        .ToList()
+                    .OrderBy(s => s.Student.LastName)
+                    .ThenBy(s => s.Student.FirstName)
+                    .ToList()
             };
 
             return View(vm);

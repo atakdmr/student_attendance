@@ -53,8 +53,9 @@ public class HomeController : Controller
                         .OrderBy(l => l.StartTime)
                         .ToListAsync();
 
-                    // Mevcut session'ları al
-                    var sessions = await _db.AttendanceSessions
+                    var lessonIds = todayLessons.Select(l => l.Id).ToList();
+                    var todaySessions = await _db.AttendanceSessions
+                        .Where(s => lessonIds.Contains(s.LessonId) && s.ScheduledAt.Date == today)
                         .Include(s => s.Lesson)
                         .Include(s => s.Group)
                         .Include(s => s.Teacher)
@@ -64,8 +65,7 @@ public class HomeController : Controller
                     var lessonsWithSessions = new List<dynamic>();
                     foreach (var lesson in todayLessons)
                     {
-                        var session = sessions.FirstOrDefault(s => s.LessonId == lesson.Id && 
-                                                                   s.ScheduledAt.Date == today);
+                        var session = todaySessions.FirstOrDefault(s => s.LessonId == lesson.Id);
                         
                         lessonsWithSessions.Add(new
                         {
@@ -111,9 +111,12 @@ public class HomeController : Controller
                         .OrderBy(l => l.StartTime)
                         .ToListAsync();
 
-                    // Mevcut session'ları al
-                    var sessions = await _db.AttendanceSessions
-                        .Where(s => s.TeacherId == currentUserId.Value)
+                    // ✅ OPTIMIZATION: Sadece bugünün session'larını çek (öğretmenin tüm session'ları yerine)
+                    var lessonIds = todayLessons.Select(l => l.Id).ToList();
+                    var todaySessions = await _db.AttendanceSessions
+                        .Where(s => s.TeacherId == currentUserId.Value 
+                                 && lessonIds.Contains(s.LessonId)
+                                 && s.ScheduledAt.Date == today)
                         .Include(s => s.Lesson)
                         .Include(s => s.Group)
                         .ToListAsync();
@@ -122,8 +125,7 @@ public class HomeController : Controller
                     var lessonsWithSessions = new List<dynamic>();
                     foreach (var lesson in todayLessons)
                     {
-                        var session = sessions.FirstOrDefault(s => s.LessonId == lesson.Id && 
-                                                                   s.ScheduledAt.Date == today);
+                        var session = todaySessions.FirstOrDefault(s => s.LessonId == lesson.Id);
                         
                         lessonsWithSessions.Add(new
                         {

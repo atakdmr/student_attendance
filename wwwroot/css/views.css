@@ -776,15 +776,15 @@
     padding: 0;
 }
 
-/* Constrain width to align with header block */
-@media (min-width: 992px) {
+/* Constrain width to align with header block - REMOVED TO FIX NARROW TABLE */
+/* @media (min-width: 992px) {
     .lessons-page .desktop-table .table-responsive,
     .lessons-page .d-none.d-md-flex {
         max-width: 1100px;
         margin-left: auto;
         margin-right: auto;
     }
-}
+} */
 
 /* Keep table header background as is (table-light) but modernize cells */
 .lessons-page table.table {

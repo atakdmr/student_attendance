@@ -95,9 +95,14 @@ namespace Yoklama.Controllers
                     teacherLessons = teacherLessons.Where(l => l.Title != null && EF.Functions.Like(l.Title, "%" + title + "%")).ToList();
                 }
 
-                // SQLite DateTimeOffset kısıtları nedeniyle client-side filtreleme
+                var lessonIds = teacherLessons.Select(l => l.Id).ToList();
+                
+                // Bugün ve bu haftanın tüm session'larını tek sorguda çek
                 var allSessions = await _db.AttendanceSessions
                     .AsNoTracking()
+                    .Where(s => lessonIds.Contains(s.LessonId) 
+                             && s.ScheduledAt.Date >= weekStart 
+                             && s.ScheduledAt.Date < weekEnd)
                     .ToListAsync();
 
                 // Bugünün dersleri
@@ -111,7 +116,7 @@ namespace Yoklama.Controllers
                         if (todaySession == null)
                         {
                             todaySession = allSessions
-                                .Where(s => s.LessonId == l.Id && s.ScheduledAt.Date >= weekStart && s.ScheduledAt.Date < weekEnd && s.Status != SessionStatus.Finalized)
+                                .Where(s => s.LessonId == l.Id && s.Status != SessionStatus.Finalized)
                                 .OrderByDescending(s => s.ScheduledAt)
                                 .FirstOrDefault();
                         }
@@ -136,7 +141,7 @@ namespace Yoklama.Controllers
                     .Select(l =>
                     {
                         var weekSession = allSessions
-                            .Where(s => s.LessonId == l.Id && s.ScheduledAt.Date >= weekStart && s.ScheduledAt.Date < weekEnd)
+                            .Where(s => s.LessonId == l.Id)
                             .OrderByDescending(s => s.ScheduledAt)
                             .FirstOrDefault();
 

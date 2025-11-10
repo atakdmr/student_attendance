@@ -26,7 +26,7 @@ namespace Yoklama.Controllers
             _userService = userService;
         }
 
-        public async Task<IActionResult> Index(Guid? groupId = null, Guid? teacherId = null, string? lessonTitle = null, int? dayOfWeek = null)
+        public async Task<IActionResult> Index()
         {
             var currentUserId = _userService.GetCurrentUserId(User);
             if (currentUserId == null) return Unauthorized();
@@ -38,51 +38,15 @@ namespace Yoklama.Controllers
             if (!isAdmin)
             {
                 query = query.Where(l => l.TeacherId == currentUserId.Value);
-
-                // Öğretmen için filtreleme
-                if (groupId.HasValue)
-                {
-                    query = query.Where(l => l.GroupId == groupId.Value);
-                }
-
-                if (dayOfWeek.HasValue)
-                {
-                    query = query.Where(l => l.DayOfWeek == dayOfWeek.Value);
-                }
-            }
-            else
-            {
-                // Admin için filtreleme
-                if (groupId.HasValue)
-                {
-                    query = query.Where(l => l.GroupId == groupId.Value);
-                }
-
-                if (teacherId.HasValue)
-                {
-                    query = query.Where(l => l.TeacherId == teacherId.Value);
-                }
-
-                if (dayOfWeek.HasValue)
-                {
-                    query = query.Where(l => l.DayOfWeek == dayOfWeek.Value);
-                }
             }
 
+            // Tüm dersleri yükle (filtreleme client-side yapılacak)
             var lessons = await query
                 .Include(l => l.Group)
                 .Include(l => l.Teacher)
                 .OrderBy(l => l.DayOfWeek)
                 .ThenBy(l => l.StartTime)
                 .ToListAsync();
-
-            // Türkçe karakter desteği için ders başlığı filtrelemesi
-            if (!string.IsNullOrWhiteSpace(lessonTitle))
-            {
-                var turkishCulture = new CultureInfo("tr-TR");
-                var searchTerm = lessonTitle.ToLower(turkishCulture);
-                lessons = lessons.Where(l => l.Title.ToLower(turkishCulture).Contains(searchTerm)).ToList();
-            }
 
             // Teacher bilgilerini manuel olarak yükle (Include çalışmıyor)
             var teacherIds = lessons.Select(l => l.TeacherId).Distinct().ToList();
@@ -181,10 +145,6 @@ namespace Yoklama.Controllers
 
             ViewBag.Groups = groups;
             ViewBag.Teachers = teachersList;
-            ViewBag.SelectedGroupId = groupId;
-            ViewBag.SelectedTeacherId = teacherId;
-            ViewBag.SelectedLessonTitle = lessonTitle;
-            ViewBag.SelectedDayOfWeek = dayOfWeek;
 
             // Admin için tüm dersleri göster (edit yok, sadece görüntüleme)
             if (isAdmin)

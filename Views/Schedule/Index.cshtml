@@ -13,57 +13,51 @@
     <div class="col-12">
         <div class="card shadow-sm">
             <div class="card-body">
-                <form method="get" class="row g-3">
+                <div class="row g-3">
                     <div class="col-lg-3 col-md-6">
                         <label for="dayOfWeek" class="form-label fw-semibold">
                             <i class="fas fa-calendar-day me-2 text-primary"></i>Gün Seçimi
                         </label>
-                        <select name="dayOfWeek" id="dayOfWeek" class="form-select" onchange="autoFilter()">
+                        <select id="dayOfWeek" class="form-select">
                             <option value="">Tüm Günler</option>
-                            <option value="1" selected="@(ViewBag.DayOfWeek?.ToString() == "1")">Pazartesi</option>
-                            <option value="2" selected="@(ViewBag.DayOfWeek?.ToString() == "2")">Salı</option>
-                            <option value="3" selected="@(ViewBag.DayOfWeek?.ToString() == "3")">Çarşamba</option>
-                            <option value="4" selected="@(ViewBag.DayOfWeek?.ToString() == "4")">Perşembe</option>
-                            <option value="5" selected="@(ViewBag.DayOfWeek?.ToString() == "5")">Cuma</option>
-                            <option value="6" selected="@(ViewBag.DayOfWeek?.ToString() == "6")">Cumartesi</option>
-                            <option value="7" selected="@(ViewBag.DayOfWeek?.ToString() == "7")">Pazar</option>
+                            <option value="1">Pazartesi</option>
+                            <option value="2">Salı</option>
+                            <option value="3">Çarşamba</option>
+                            <option value="4">Perşembe</option>
+                            <option value="5">Cuma</option>
+                            <option value="6">Cumartesi</option>
+                            <option value="7">Pazar</option>
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <label for="groupId" class="form-label fw-semibold">
+                        <label for="groupFilter" class="form-label fw-semibold">
                             <i class="fas fa-layer-group me-2 text-primary"></i>Grup Seçimi
                         </label>
-                        <select name="groupId" id="groupId" class="form-select" onchange="autoFilter()">
+                        <select id="groupFilter" class="form-select">
                             <option value="">Tüm Gruplar</option>
-                            @foreach (var group in Model.Groups)
+                            @foreach (var group in Model.Groups.Distinct())
                             {
-                                <option value="@group.Id"
-                                    selected="@(Model.SelectedGroupId?.ToString() == group.Id.ToString())">
-                                    @group.Name (@group.Code)
-                                </option>
+                                <option value="@group.Name.ToLower()">@group.Name (@group.Code)</option>
                             }
                         </select>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <label for="lessonTitle" class="form-label fw-semibold">
-                            <i class="fas fa-book me-2 text-primary"></i>Ders Seçimi
+                        <label for="lessonSearch" class="form-label fw-semibold">
+                            <i class="fas fa-book me-2 text-primary"></i>Ders Ara
                         </label>
                         <div class="input-group">
-                            <input type="text" name="lessonTitle" id="lessonTitle" class="form-control"
-                                value="@ViewBag.SelectedLessonTitle" placeholder="Ders adı ara...">
-                            <button type="submit" class="btn btn-primary">
+                            <input type="text" id="lessonSearch" class="form-control" placeholder="Ders adı yazın...">
+                            <button id="lessonSearchBtn" class="btn btn-primary" type="button">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="col-12">
-                        <div class="d-flex gap-2">
-                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-1"></i>Temizleme
-                            </a>
-                        </div>
+                    <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                        <button id="clearFilters" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-times me-1"></i>Filtreleri Temizle
+                        </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -79,49 +73,23 @@
                 </h5>
             </div>
             <div class="card-body">
-                @if ((Model.IsAdmin && !Model.HasAnyFilters) || (!Model.HasAnyFilters && !Model.Days.Any(d =>
-                                d.Lessons.Any())))
-                {
-                    <div class="empty-state text-center py-5">
-                        <div class="mb-4">
-                            <i class="fas fa-filter fa-4x text-muted"></i>
-                        </div>
-                        <h4 class="text-muted mb-3">Filtreleme Gerekli</h4>
-                        <p class="text-muted mb-4">
-                            @if (Model.IsAdmin)
-                            {
-                                <text>Sistemdeki tüm dersleri görmek için yukarıdaki filtreleri kullanın.</text>
-                            }
-                            else
-                            {
-                                <text>Ders programınızı görmek için yukarıdaki filtreleri kullanın.</text>
-                            }
-                        </p>
-                        @if (!Model.IsAdmin)
-                        {
-                            <div class="d-flex gap-2 justify-content-center">
-                                <button type="button" class="btn btn-primary" onclick="showAllDays()">
-                                    <i class="fas fa-calendar-week me-1"></i>Tüm Günleri Göster
-                                </button>
+                <div class="schedule-grid">
+                    @foreach (var day in Model.Days)
+                    {
+                        <div class="day-column" data-day="@day.DayOfWeek">
+                            <div class="day-header">
+                                <h6 class="day-title">@day.DayName</h6>
                             </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="schedule-grid">
-                        @foreach (var day in Model.Days)
-                        {
-                            <div class="day-column">
-                                <div class="day-header">
-                                    <h6 class="day-title">@day.DayName</h6>
-                                </div>
-                                <div class="day-lessons">
-                                    @if (day.Lessons.Any())
+                            <div class="day-lessons">
+                                @if (day.Lessons.Any())
+                                {
+                                    @foreach (var lesson in day.Lessons.OrderBy(l => l.StartTime))
                                     {
-                                        @foreach (var lesson in day.Lessons.OrderBy(l => l.StartTime))
-                                        {
-                                            <div class="lesson-card @(lesson.TeacherId == currentUserId ? "my-lesson" : "")">
+                                        <div class="lesson-card @(lesson.TeacherId == currentUserId ? "my-lesson" : "")"
+                                             data-day="@day.DayOfWeek"
+                                             data-group="@lesson.GroupName.ToLower()"
+                                             data-title="@lesson.Title.ToLower()"
+                                             data-teacher="@lesson.TeacherName.ToLower()">
                                                 <div class="lesson-time">
                                                     @lesson.StartTime.ToString(@"hh\:mm") - @lesson.EndTime.ToString(@"hh\:mm")
                                                 </div>
@@ -197,20 +165,19 @@
                                                 }
 
                                             </div>
-                                        }
                                     }
-                                    else
-                                    {
-                                        <div class="no-lessons">
-                                            <i class="fas fa-calendar-times"></i>
-                                            <span>Ders yok</span>
-                                        </div>
-                                    }
-                                </div>
+                                }
+                                else
+                                {
+                                    <div class="no-lessons">
+                                        <i class="fas fa-calendar-times"></i>
+                                        <span>Ders yok</span>
+                                    </div>
+                                }
                             </div>
-                        }
-                    </div>
-                }
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -218,24 +185,72 @@
 
 
 <script>
-    // Otomatik filtreleme fonksiyonu (sadece dropdown'lar için)
-    function autoFilter() {
-        const form = document.querySelector('form');
-        form.submit();
-    }
+    (function () {
+        var dayFilter = document.getElementById('dayOfWeek');
+        var groupFilter = document.getElementById('groupFilter');
+        var lessonSearch = document.getElementById('lessonSearch');
+        var searchBtn = document.getElementById('lessonSearchBtn');
+        var clearBtn = document.getElementById('clearFilters');
 
-    // Enter tuşu ile arama
-    document.getElementById('lessonTitle').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const form = document.querySelector('form');
-            form.submit();
+        function applyFilters() {
+            var selectedDay = (dayFilter.value || '').trim();
+            var selectedGroup = (groupFilter.value || '').toLowerCase().trim();
+            var searchQuery = (lessonSearch.value || '').toLowerCase().trim();
+
+            // Tüm günleri kontrol et
+            var dayColumns = document.querySelectorAll('.day-column');
+            dayColumns.forEach(function (dayColumn) {
+                var dayNumber = dayColumn.getAttribute('data-day');
+                var shouldShowDay = !selectedDay || selectedDay === dayNumber;
+                
+                if (!shouldShowDay) {
+                    dayColumn.style.display = 'none';
+                    return;
+                }
+
+                // Gün içindeki dersleri filtrele
+                var lessonCards = dayColumn.querySelectorAll('.lesson-card');
+                var visibleLessons = 0;
+
+                lessonCards.forEach(function (card) {
+                    var cardGroup = (card.getAttribute('data-group') || '').toLowerCase();
+                    var cardTitle = (card.getAttribute('data-title') || '').toLowerCase();
+                    
+                    var matchGroup = !selectedGroup || cardGroup === selectedGroup;
+                    var matchSearch = !searchQuery || cardTitle.indexOf(searchQuery) !== -1;
+                    
+                    if (matchGroup && matchSearch) {
+                        card.style.display = '';
+                        visibleLessons++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Gün görünür olacak mı?
+                dayColumn.style.display = (visibleLessons > 0) ? '' : 'none';
+            });
         }
-    });
 
-    // Tüm günleri göster fonksiyonu
-    function showAllDays() {
-        // Filtreleri temizle ve sayfayı yenile
-        window.location.href = '@Url.Action("Index")';
-    }
+        function clearFilters() {
+            dayFilter.value = '';
+            groupFilter.value = '';
+            lessonSearch.value = '';
+            applyFilters();
+        }
+
+        // Event listeners
+        if (dayFilter) dayFilter.addEventListener('change', applyFilters);
+        if (groupFilter) groupFilter.addEventListener('change', applyFilters);
+        if (searchBtn) searchBtn.addEventListener('click', applyFilters);
+        if (clearBtn) clearBtn.addEventListener('click', clearFilters);
+        if (lessonSearch) {
+            lessonSearch.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    applyFilters();
+                }
+            });
+        }
+    })();
 </script>

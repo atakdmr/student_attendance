@@ -55,39 +55,26 @@
                                 <label for="groupFilter" class="form-label fw-semibold">
                                     <i class="fas fa-filter me-2 text-primary"></i>Grup Filtresi
                                 </label>
-                                <form method="get" id="groupForm">
-                                    <select name="groupId" id="groupFilter" class="form-select" onchange="this.form.submit()">
-                                        <option value="">Tüm Gruplar</option>
-                                        @foreach (var group in Model.Groups)
-                                        {
-                                            if (Model.SelectedGroupId == group.Id)
-                                            {
-                                                <option value="@group.Id" selected>@group.Name (@group.Code)</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@group.Id">@group.Name (@group.Code)</option>
-                                            }
-                                        }
-                                    </select>
-                                    <input type="hidden" name="search" value="@Model.Search" />
-                                    <input type="hidden" name="page" value="1" />
-                                </form>
+                                <select id="groupFilter" class="form-select">
+                                    <option value="">Tüm Gruplar</option>
+                                    @foreach (var group in Model.Groups)
+                                    {
+                                        <option value="@group.Name.ToLower()">@group.Name (@group.Code)</option>
+                                    }
+                                </select>
                             </div>
                             <div class="col-md-6 col-lg-5">
                                 <label class="form-label fw-semibold">
                                     <i class="fas fa-search me-2 text-primary"></i>Arama
                                 </label>
-                                <form method="get" class="d-flex" role="search" id="searchForm">
-                                    <input type="hidden" name="groupId" value="@Model.SelectedGroupId" />
-                                    <input type="search" name="search" value="@Model.Search" 
+                                <div class="d-flex">
+                                    <input type="search" id="searchInput" 
                                            class="form-control me-2" 
-                                           placeholder="İsim veya numara ara..." 
-                                           id="searchInput" />
-                                    <button class="btn btn-primary" type="submit" id="searchBtn">
+                                           placeholder="İsim veya numara ara..." />
+                                    <button class="btn btn-primary" type="button" id="searchBtn">
                                         <i class="fas fa-search"></i>
                                     </button>
-                                </form>
+                                </div>
                             </div>
                             <div class="col-md-2 col-lg-4">
                                 <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
@@ -104,41 +91,26 @@
                                 <label for="groupFilterMobile" class="form-label fw-semibold fs-6">
                                     <i class="fas fa-filter me-1 text-primary"></i>Grup
                                 </label>
-                                <form method="get" id="groupFormMobile">
-                                    <select name="groupId" id="groupFilterMobile" class="form-select fs-6" onchange="this.form.submit()">
-                                        <option value="">Tüm Gruplar</option>
-                                        @foreach (var group in Model.Groups)
-                                        {
-                                            if (Model.SelectedGroupId == group.Id)
-                                            {
-                                                <option value="@group.Id" selected>@group.Name</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@group.Id">@group.Name</option>
-                                            }
-                                        }
-                                    </select>
-                                    <input type="hidden" name="search" value="@Model.Search" />
-                                    <input type="hidden" name="page" value="1" />
-                                </form>
+                                <select id="groupFilterMobile" class="form-select fs-6">
+                                    <option value="">Tüm Gruplar</option>
+                                    @foreach (var group in Model.Groups)
+                                    {
+                                        <option value="@group.Name.ToLower()">@group.Name</option>
+                                    }
+                                </select>
                             </div>
                             <div class="col-8">
                                 <label class="form-label fw-semibold fs-6">
                                     <i class="fas fa-search me-1 text-primary"></i>Arama
                                 </label>
-                                <form method="get" role="search" id="searchFormMobile">
-                                    <input type="hidden" name="groupId" value="@Model.SelectedGroupId" />
-                                    <input type="search" name="search" value="@Model.Search" 
-                                           class="form-control fs-6" 
-                                           placeholder="İsim veya numara..." 
-                                           id="searchInputMobile" />
-                                </form>
+                                <input type="search" id="searchInputMobile" 
+                                       class="form-control fs-6" 
+                                       placeholder="İsim veya numara..." />
                             </div>
                             <div class="col-4">
                                 <label class="form-label fw-semibold fs-6 text-white">.</label>
                                 <div class="d-flex gap-1">
-                                    <button class="btn btn-primary flex-fill fs-6" type="submit" form="searchFormMobile">
+                                    <button class="btn btn-primary flex-fill fs-6" type="button" onclick="applyFilters()">
                                         <i class="fas fa-search me-1"></i>Ara
                                     </button>
                                     <button class="btn btn-outline-secondary fs-6" onclick="clearFilters()">
@@ -188,7 +160,6 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    @{ var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize); }
                     @if (Model.Students.Any())
                     {
                         <!-- Desktop Table View -->
@@ -216,7 +187,11 @@
                                 <tbody>
                                     @foreach (var student in Model.Students)
                                     {
-                                        <tr class="@(!student.IsActive ? "table-secondary" : "")" style="height: 60px;">
+                                        <tr class="@(!student.IsActive ? "table-secondary" : "")" style="height: 60px;"
+                                            data-student="@student.FullName.ToLower()"
+                                            data-number="@student.StudentNumber.ToLower()"
+                                            data-group="@student.GroupName.ToLower()"
+                                            data-active="@student.IsActive.ToString().ToLower()">
                                             <td class="py-3">
                                                 <span class="text-truncate-sm" data-tooltip="@student.StudentNumber">@student.StudentNumber</span>
                                             </td>
@@ -268,7 +243,11 @@
                         <div class="d-lg-none">
                             @foreach (var student in Model.Students)
                             {
-                                <div class="card mb-4 student-card-mobile">
+                                <div class="card mb-4 student-card-mobile"
+                                     data-student="@student.FullName.ToLower()"
+                                     data-number="@student.StudentNumber.ToLower()"
+                                     data-group="@student.GroupName.ToLower()"
+                                     data-active="@student.IsActive.ToString().ToLower()">
                                     <div class="card-body p-4">
                                         <div class="mb-4">
                                             <h5 class="card-title mb-2 fw-bold text-dark">@student.FullName</h5>
@@ -311,40 +290,12 @@
                             }
                         </div>
 
-                        @if (totalPages > 1)
-                        {
-                            <nav aria-label="Sayfalama">
-                                <ul class="pagination justify-content-end">
-                                    <li class="page-item @(Model.Page == 1 ? "disabled" : null)">
-                                        <a class="page-link" href="@Url.Action("Students", "Admin", new { groupId = Model.SelectedGroupId, search = Model.Search, page = Model.Page - 1, pageSize = Model.PageSize })">Önceki</a>
-                                    </li>
-                                    @for (int i = 1; i <= totalPages; i++)
-                                    {
-                                        <li class="page-item @(i == Model.Page ? "active" : null)">
-                                            <a class="page-link" href="@Url.Action("Students", "Admin", new { groupId = Model.SelectedGroupId, search = Model.Search, page = i, pageSize = Model.PageSize })">@i</a>
-                                        </li>
-                                    }
-                                    <li class="page-item @(Model.Page == totalPages ? "disabled" : null)">
-                                        <a class="page-link" href="@Url.Action("Students", "Admin", new { groupId = Model.SelectedGroupId, search = Model.Search, page = Model.Page + 1, pageSize = Model.PageSize })">Sonraki</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        }
                     }
                     else
                     {
                         <div class="text-center py-4">
                             <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">
-                                @if (Model.SelectedGroupId.HasValue)
-                                {
-                                    <text>Bu grupta öğrenci bulunmuyor</text>
-                                }
-                                else
-                                {
-                                    <text>Henüz öğrenci bulunmuyor</text>
-                                }
-                            </h5>
+                            <h5 class="text-muted">Henüz öğrenci bulunmuyor</h5>
                             <p class="text-muted">İlk öğrenciyi oluşturmak için yukarıdaki "Yeni Öğrenci" butonunu kullanın.</p>
                         </div>
                     }
@@ -412,10 +363,81 @@
         document.getElementById('searchInput').addEventListener('input', function() {
             this.classList.remove('is-invalid');
         });
+    </script>
+    
+    <script>
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('groupFilter').value = '';
+            if (document.getElementById('searchInputMobile')) {
+                document.getElementById('searchInputMobile').value = '';
+            }
+            if (document.getElementById('groupFilterMobile')) {
+                document.getElementById('groupFilterMobile').value = '';
+            }
+            applyFilters();
+        }
 
-        // Auto-submit group filter
-        document.getElementById('groupFilter').addEventListener('change', function() {
-            document.getElementById('groupForm').submit();
+        function applyFilters() {
+            var searchDesktop = document.getElementById('searchInput').value.toLowerCase().trim();
+            var searchMobile = document.getElementById('searchInputMobile') ? document.getElementById('searchInputMobile').value.toLowerCase().trim() : '';
+            var search = searchDesktop || searchMobile;
+            
+            var groupFilterDesktop = document.getElementById('groupFilter').value.toLowerCase().trim();
+            var groupFilterMobile = document.getElementById('groupFilterMobile') ? document.getElementById('groupFilterMobile').value.toLowerCase().trim() : '';
+            var groupFilter = groupFilterDesktop || groupFilterMobile;
+
+            // Desktop table rows
+            var tableRows = document.querySelectorAll('table tbody tr[data-student]');
+            // Mobile cards
+            var mobileCards = document.querySelectorAll('.student-card-mobile[data-student]');
+
+            var allItems = [...tableRows, ...mobileCards];
+
+            allItems.forEach(function (item) {
+                var student = (item.getAttribute('data-student') || '').toLowerCase();
+                var number = (item.getAttribute('data-number') || '').toLowerCase();
+                var group = (item.getAttribute('data-group') || '').toLowerCase();
+
+                var matchSearch = !search || student.includes(search) || number.includes(search);
+                var matchGroup = !groupFilter || group === groupFilter;
+
+                if (matchSearch && matchGroup) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var searchBtn = document.getElementById('searchBtn');
+            var searchInput = document.getElementById('searchInput');
+            var groupFilter = document.getElementById('groupFilter');
+            var groupFilterMobile = document.getElementById('groupFilterMobile');
+            var searchInputMobile = document.getElementById('searchInputMobile');
+
+            if (searchBtn) searchBtn.addEventListener('click', applyFilters);
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyFilters();
+                    }
+                });
+            }
+            if (searchInputMobile) {
+                searchInputMobile.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyFilters();
+                    }
+                });
+            }
+
+            // Auto-apply filters on change
+            if (groupFilter) groupFilter.addEventListener('change', applyFilters);
+            if (groupFilterMobile) groupFilterMobile.addEventListener('change', applyFilters);
         });
     </script>
 }

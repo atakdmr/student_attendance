@@ -43,17 +43,14 @@ namespace Yoklama.Services
 
         public async Task<AttendanceSession?> GetExistingSessionAsync(Guid lessonId, DateTime sessionDate)
         {
-            // SQLite DateTimeOffset sorunu için client-side filtreleme kullan
-            var sessions = await _db.AttendanceSessions
-                .Where(s => s.LessonId == lessonId)
-                .ToListAsync();
-            
             var startOfDay = sessionDate.Date;
             var endOfDay = sessionDate.Date.AddDays(1);
             
-            return sessions.FirstOrDefault(s => 
-                s.ScheduledAt.Date >= startOfDay && 
-                s.ScheduledAt.Date < endOfDay);
+            return await _db.AttendanceSessions
+                .Where(s => s.LessonId == lessonId 
+                         && s.ScheduledAt >= startOfDay 
+                         && s.ScheduledAt < endOfDay)
+                .FirstOrDefaultAsync();
         }
 
         // Haftalık session kontrolü için yeni method
@@ -69,11 +66,7 @@ namespace Yoklama.Services
             if (lesson == null)
                 return null;
 
-            // SQLite DateTimeOffset sorunu için client-side filtreleme kullan
-            var sessions = await _db.AttendanceSessions
-                .Where(s => s.LessonId == lessonId && s.Status != SessionStatus.Finalized)
-                .ToListAsync();
-
+            // ✅ OPTIMIZATION: MySQL destekli direkt tarih filtreleme (client-side kaldırıldı)
             var targetDayOfWeek = (int)sessionDate.DayOfWeek;
             if (targetDayOfWeek == 0) targetDayOfWeek = 7; // Pazar = 7
 
@@ -81,9 +74,13 @@ namespace Yoklama.Services
             var weekStart = sessionDate.Date.AddDays(-(int)sessionDate.DayOfWeek + 1);
             var weekEnd = weekStart.AddDays(7);
             
-            return sessions.FirstOrDefault(s => 
-                s.ScheduledAt.Date >= weekStart && 
-                s.ScheduledAt.Date < weekEnd);
+            return await _db.AttendanceSessions
+                .Where(s => s.LessonId == lessonId 
+                         && s.Status != SessionStatus.Finalized
+                         && s.ScheduledAt >= weekStart 
+                         && s.ScheduledAt < weekEnd)
+                .OrderByDescending(s => s.ScheduledAt)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<AttendanceSession> OpenOrGetSessionAsync(Guid lessonId, DateTimeOffset scheduledAt, Guid currentUserId)

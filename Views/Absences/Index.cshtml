@@ -102,26 +102,25 @@
         </div>
         <div class="card-body">
 
-            <form method="get" class="row g-3" id="filterForm">
+            <div class="row g-3" id="filterForm">
                 <div class="col-lg-2 col-md-6">
                     <label class="form-label">
                         <i class="fas fa-search me-1"></i>Arama
                     </label>
-                    <input type="text" class="form-control" name="search" value="@ViewBag.Search"
+                    <input type="text" class="form-control" id="searchInput"
                         placeholder="Öğrenci, ders veya grup ara...">
                 </div>
                 <div class="col-lg-2 col-md-6">
                     <label class="form-label">
                         <i class="fas fa-layer-group me-1"></i>Grup
                     </label>
-                    <select class="form-select" name="groupId">
+                    <select class="form-select" id="groupFilter">
                         <option value="">Tüm Gruplar</option>
                         @if (ViewBag.Groups != null)
                         {
                             @foreach (var group in ViewBag.Groups)
                             {
-                                <option value="@group.Id" selected="@(ViewBag.GroupId?.ToString() == group.Id.ToString())">
-                                    @group.Name</option>
+                                <option value="@group.Name.ToLower()">@group.Name</option>
                             }
                         }
                     </select>
@@ -130,37 +129,32 @@
                     <label class="form-label">
                         <i class="fas fa-calendar-day me-1"></i>Başlangıç
                     </label>
-                    <input type="date" class="form-control" name="startDate" value="@ViewBag.StartDate">
+                    <input type="date" class="form-control" id="startDateFilter">
                 </div>
                 <div class="col-lg-2 col-md-6">
                     <label class="form-label">
                         <i class="fas fa-calendar-day me-1"></i>Bitiş
                     </label>
-                    <input type="date" class="form-control" name="endDate" value="@ViewBag.EndDate">
+                    <input type="date" class="form-control" id="endDateFilter">
                 </div>
                 <div class="col-lg-2 col-md-6">
                     <label class="form-label">
                         <i class="fas fa-sort me-1"></i>Sırala
                     </label>
-                    <select class="form-select" name="sortBy">
-                        <option value="date" selected="@(ViewBag.SortBy == "date")">Tarih</option>
-                        <option value="student" selected="@(ViewBag.SortBy == "student")">Öğrenci</option>
-                        <option value="group" selected="@(ViewBag.SortBy == "group")">Grup</option>
-                        <option value="lesson" selected="@(ViewBag.SortBy == "lesson")">Ders</option>
+                    <select class="form-select" id="sortByFilter">
+                        <option value="date">Tarih</option>
+                        <option value="student">Öğrenci</option>
+                        <option value="group">Grup</option>
+                        <option value="lesson">Ders</option>
                     </select>
                 </div>
                 <div class="col-lg-2 col-md-6 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100 text-center" id="filterBtn">
+                    <button type="button" class="btn btn-primary w-100 text-center" id="filterBtn">
                         <i class="fas fa-search me-1 d-none d-sm-inline"></i>
                         <span class="d-sm-none">Ara</span>
                         <span class="d-none d-sm-inline">Filtrele</span>
                     </button>
                 </div>
-            </form>
-
-            <div id="warningAlert" class="alert alert-warning d-none mt-3" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Zaten tüm kayıtlar gösteriliyor!</strong> Filtreleme yapmak için yukarıdaki alanları doldurun.
             </div>
         </div>
     </div>
@@ -182,7 +176,11 @@
                         {
                             if(!string.IsNullOrEmpty(r.Student.Phone))
                             {
-                                <div class="list-group-item py-2">
+                                <div class="list-group-item py-2"
+                                     data-student="@r.Student.FullName.ToLower()"
+                                     data-group="@r.Session.Lesson.Group.Name.ToLower()"
+                                     data-lesson="@r.Session.Lesson.Title.ToLower()"
+                                     data-date="@r.Session.ScheduledAt.ToString("yyyy-MM-dd")">
                                     <div class="d-flex justify-content-between align-items-start gap-2">
                                         <div class="flex-grow-1">
                                             <div class="fw-semibold text-truncate" title="@r.Student.FullName">@r.Student.FullName</div>
@@ -255,7 +253,10 @@
                             {
                                 if(!string.IsNullOrEmpty(r.Student.Phone))
                                 {
-                                     <tr>
+                                     <tr data-student="@r.Student.FullName.ToLower()"
+                                         data-group="@r.Session.Lesson.Group.Name.ToLower()"
+                                         data-lesson="@r.Session.Lesson.Title.ToLower()"
+                                         data-date="@r.Session.ScheduledAt.ToString("yyyy-MM-dd")">
                                         <td>
                                             <div class="d-flex flex-column">
                                                 <span
@@ -338,90 +339,91 @@
 @section Scripts {
     <script>
         function clearFilters() {
-            // Clear all form inputs
-            document.getElementById('filterForm').reset();
-
-            // Redirect to clean URL
-            window.location.href = '@Url.Action("Index", "Absences")';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('groupFilter').value = '';
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            document.getElementById('sortByFilter').value = 'date';
+            applyFilters();
         }
 
-        // Auto-submit form on change for better UX
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('filterForm');
-            const inputs = form.querySelectorAll('select, input[type="date"]');
-            const filterBtn = document.getElementById('filterBtn');
-            const warningAlert = document.getElementById('warningAlert');
+        function applyFilters() {
+            var search = document.getElementById('searchInput').value.toLowerCase().trim();
+            var groupFilter = document.getElementById('groupFilter').value.toLowerCase().trim();
+            var startDate = document.getElementById('startDateFilter').value;
+            var endDate = document.getElementById('endDateFilter').value;
+            var sortBy = document.getElementById('sortByFilter').value;
 
-            // Check if all filters are empty
-            function areFiltersEmpty() {
-                const search = form.querySelector('input[name="search"]').value.trim();
-                const groupId = form.querySelector('select[name="groupId"]').value;
-                const startDate = form.querySelector('input[name="startDate"]').value;
-                const endDate = form.querySelector('input[name="endDate"]').value;
+            // Desktop table rows
+            var tableRows = document.querySelectorAll('#absencesTable tbody tr');
+            // Mobile cards
+            var mobileCards = document.querySelectorAll('.list-group-item[data-student]');
 
-                return !search && !groupId && !startDate && !endDate;
-            }
+            var allItems = [...tableRows, ...mobileCards];
 
-            // Check if we should disable button (from localStorage)
-            function checkButtonState() {
-                const hasShownAllRecords = localStorage.getItem('absencesAllRecordsShown') === 'true';
-                if (hasShownAllRecords && areFiltersEmpty()) {
-                    filterBtn.disabled = true;
-                    filterBtn.innerHTML = '<i class="fas fa-ban me-1"></i>Devre Dışı';
-                    warningAlert.classList.remove('d-none');
-                }
-            }
+            allItems.forEach(function (item) {
+                var student = (item.getAttribute('data-student') || '').toLowerCase();
+                var group = (item.getAttribute('data-group') || '').toLowerCase();
+                var lesson = (item.getAttribute('data-lesson') || '').toLowerCase();
+                var date = item.getAttribute('data-date') || '';
 
-            // Initialize button state
-            checkButtonState();
+                var matchSearch = !search || student.includes(search) || group.includes(search) || lesson.includes(search);
+                var matchGroup = !groupFilter || group === groupFilter;
+                var matchStartDate = !startDate || date >= startDate;
+                var matchEndDate = !endDate || date <= endDate;
 
-            // Handle form submit
-            form.addEventListener('submit', function (e) {
-                if (areFiltersEmpty()) {
-                    const hasShownAllRecords = localStorage.getItem('absencesAllRecordsShown') === 'true';
-                    if (hasShownAllRecords) {
-                        e.preventDefault();
-                        warningAlert.classList.remove('d-none');
-                        return false;
-                    } else {
-                        // First time showing all records
-                        localStorage.setItem('absencesAllRecordsShown', 'true');
-                        filterBtn.disabled = true;
-                        filterBtn.innerHTML = '<i class="fas fa-ban me-1"></i>Devre Dışı';
-                        // Allow first submit to proceed
-                    }
+                if (matchSearch && matchGroup && matchStartDate && matchEndDate) {
+                    item.style.display = '';
                 } else {
-                    // Has filters, reset state
-                    localStorage.removeItem('absencesAllRecordsShown');
-                    warningAlert.classList.add('d-none');
-                    filterBtn.disabled = false;
-                    filterBtn.innerHTML = '<i class="fas fa-search me-1 d-none d-sm-inline"></i><span class="d-sm-none">Ara</span><span class="d-none d-sm-inline">Filtrele</span>';
+                    item.style.display = 'none';
                 }
             });
 
-            // Enable button when any input changes
-            function enableButton() {
-                localStorage.removeItem('absencesAllRecordsShown');
-                warningAlert.classList.add('d-none');
-                filterBtn.disabled = false;
-                filterBtn.innerHTML = '<i class="fas fa-search me-1 d-none d-sm-inline"></i><span class="d-sm-none">Ara</span><span class="d-none d-sm-inline">Filtrele</span>';
+            // Sorting
+            if (sortBy !== 'date') {
+                var tbody = document.querySelector('#absencesTable tbody');
+                if (tbody) {
+                    var rows = Array.from(tbody.querySelectorAll('tr[data-student]'));
+                    rows.sort(function (a, b) {
+                        var aVal, bVal;
+                        if (sortBy === 'student') {
+                            aVal = a.getAttribute('data-student');
+                            bVal = b.getAttribute('data-student');
+                        } else if (sortBy === 'group') {
+                            aVal = a.getAttribute('data-group');
+                            bVal = b.getAttribute('data-group');
+                        } else if (sortBy === 'lesson') {
+                            aVal = a.getAttribute('data-lesson');
+                            bVal = b.getAttribute('data-lesson');
+                        }
+                        return aVal.localeCompare(bVal);
+                    });
+                    rows.forEach(function (row) {
+                        tbody.appendChild(row);
+                    });
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var filterBtn = document.getElementById('filterBtn');
+            var searchInput = document.getElementById('searchInput');
+
+            if (filterBtn) filterBtn.addEventListener('click', applyFilters);
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyFilters();
+                    }
+                });
             }
 
-            // Add event listeners to all inputs
-            inputs.forEach(input => {
-                input.addEventListener('change', function () {
-                    enableButton();
-                    // Don't auto-submit, let user click the filter button
-                });
-            });
-
-            // Add event listener to search input for real-time updates
-            const searchInput = form.querySelector('input[name="search"]');
-            searchInput.addEventListener('input', function () {
-                if (this.value.trim() !== '') {
-                    enableButton();
-                }
-            });
+            // Auto-apply filters on change
+            document.getElementById('groupFilter').addEventListener('change', applyFilters);
+            document.getElementById('startDateFilter').addEventListener('change', applyFilters);
+            document.getElementById('endDateFilter').addEventListener('change', applyFilters);
+            document.getElementById('sortByFilter').addEventListener('change', applyFilters);
         });
     </script>
 }

@@ -304,7 +304,7 @@
                                                 <tr class="border-bottom">
                                                     <td class="py-3 px-4">@l.Title</td>
                                                     <td class="py-3 px-4">@(l.Group?.Name ?? "Grup Yok")</td>
-                                                    <td class="py-3 px-4">@GetDayName(l.DayOfWeek) <span class=" fw-semibold px-1 py-1 text-primary fs-6"">/</span>  @l.StartTime.ToString(@"hh\:mm")</td>
+                                                    <td class="py-3 px-4">@GetDayName(l.DayOfWeek) <span class="fw-semibold px-1 py-1 text-primary fs-6">/</span>  @l.StartTime.ToString(@"hh\:mm")</td>
                                                     <td class="py-3 px-4 text-end">
                                                         @if (IsToday(l.DayOfWeek))
                                                         {

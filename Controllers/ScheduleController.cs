@@ -16,7 +16,7 @@ namespace Yoklama.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string dayOfWeek, string groupId, string lessonTitle, string sortBy = "day")
+        public async Task<IActionResult> Index()
         {
             ViewData["Title"] = "Ders Programı";
             
@@ -27,66 +27,20 @@ namespace Yoklama.Controllers
             var currentUser = await _context.Users.FindAsync(userId);
             if (currentUser == null) return RedirectToAction("Login", "Account");
 
-            // String parametreleri parse et
-            int? parsedDayOfWeek = null;
-            if (!string.IsNullOrEmpty(dayOfWeek) && int.TryParse(dayOfWeek, out var day))
-            {
-                parsedDayOfWeek = day;
-            }
-
-            Guid? parsedGroupId = null;
-            if (!string.IsNullOrEmpty(groupId) && Guid.TryParse(groupId, out var group))
-            {
-                parsedGroupId = group;
-            }
-
-
+            // Tüm dersleri çek (filtreleme client-side yapılacak)
             var lessonsQuery = _context.Lessons
                 .Where(l => l.IsActive)
                 .Include(l => l.Group)
                 .Include(l => l.Teacher)
+                .OrderBy(l => l.DayOfWeek)
+                .ThenBy(l => l.StartTime)
                 .AsQueryable();
 
-            // Filtreleme
+            // Sadece role bazlı filtreleme
             if (currentUser.Role != UserRole.Admin)
             {
                 // Öğretmen: sadece kendi dersleri
                 lessonsQuery = lessonsQuery.Where(l => l.TeacherId == currentUser.Id);
-            }
-            else
-            {
-                // Admin: Filtreleme yapılmadıysa hiçbir ders gösterme
-                var hasFilters = parsedDayOfWeek.HasValue || parsedGroupId.HasValue || !string.IsNullOrWhiteSpace(lessonTitle);
-                if (!hasFilters)
-                {
-                    // Admin kullanıcı için filtre yoksa boş liste döndür
-                    lessonsQuery = lessonsQuery.Where(l => false); // Hiçbir ders döndürmez
-                }
-            }
-
-            if (parsedDayOfWeek.HasValue)
-                lessonsQuery = lessonsQuery.Where(l => l.DayOfWeek == parsedDayOfWeek.Value);
-
-            if (parsedGroupId.HasValue)
-                lessonsQuery = lessonsQuery.Where(l => l.GroupId == parsedGroupId.Value);
-
-            if (!string.IsNullOrWhiteSpace(lessonTitle))
-            {
-                lessonsQuery = lessonsQuery.Where(l => l.Title.ToLower().Contains(lessonTitle.ToLower()));
-            }
-
-            // Sıralama
-            switch (sortBy)
-            {
-                case "time":
-                    lessonsQuery = lessonsQuery.OrderBy(l => l.StartTime);
-                    break;
-                case "title":
-                    lessonsQuery = lessonsQuery.OrderBy(l => l.Title);
-                    break;
-                default:
-                    lessonsQuery = lessonsQuery.OrderBy(l => l.DayOfWeek).ThenBy(l => l.StartTime);
-                    break;
             }
 
             var lessons = await lessonsQuery.ToListAsync();
@@ -107,20 +61,6 @@ namespace Yoklama.Controllers
                     .Distinct()
                     .OrderBy(g => g.Name)
                     .ToListAsync();
-
-            // Öğretmen listesi (admin için)
-            var teachers = new List<Yoklama.Models.Entities.User>();
-            if (currentUser.Role == UserRole.Admin)
-            {
-                teachers = await _context.Users
-                    .Where(u => (u.Role == UserRole.Teacher || u.Role == UserRole.Admin) && u.IsActive)
-                    .OrderBy(u => u.FullName)
-                    .ToListAsync();
-            }
-
-            ViewBag.DayOfWeek = parsedDayOfWeek;
-            ViewBag.SortBy = sortBy;
-            ViewBag.SelectedLessonTitle = lessonTitle;
 
             // Haftalık ders programı için günleri oluştur
             var days = new List<ScheduleDayVm>();
@@ -178,9 +118,7 @@ namespace Yoklama.Controllers
             {
                 Days = days,
                 Groups = groups,
-                SelectedGroupId = parsedGroupId,
-                IsAdmin = currentUser.Role == UserRole.Admin,
-                HasAnyFilters = parsedDayOfWeek.HasValue || parsedGroupId.HasValue || !string.IsNullOrWhiteSpace(lessonTitle)
+                IsAdmin = currentUser.Role == UserRole.Admin
             };
 
             return View(vm);

@@ -17,7 +17,7 @@ It allows teachers and administrators to manage groups, students, lessons, and t
 ## 🛠️ Tech Stack
 - .NET 9 / ASP.NET Core MVC  
 - Entity Framework Core  
-- SQLite Database  
+- MySQL Database  
 - HTML, CSS, JavaScript  
 
 ## 📷 Screenshots

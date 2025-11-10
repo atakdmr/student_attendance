@@ -304,50 +304,33 @@ namespace Yoklama.Controllers
 
         #region Student Management
 
-        public async Task<IActionResult> Students(Guid? groupId = null, string? search = null, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Students()
         {
-            var query = _db.Students.Include(s => s.Group).AsQueryable();
-            if (groupId.HasValue)
-            {
-                query = query.Where(s => s.GroupId == groupId.Value);
-            }
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var term = search.Trim().ToLower();
-                query = query.Where(s =>
-                    (s.FirstName + " " + s.LastName).ToLower().Contains(term) ||
-                    s.StudentNumber.ToLower().Contains(term));
-            }
-
-            var total = await query.CountAsync();
-            var items = await query
+            // Tüm öğrencileri yükle (filtreleme ve pagination client-side yapılacak)
+            var students = await _db.Students
+                .Include(s => s.Group)
                 .OrderBy(s => s.Group.Name)
                 .ThenBy(s => s.LastName)
                 .ThenBy(s => s.FirstName)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
                 .ToListAsync();
 
             var groups = await _db.Groups.OrderBy(g => g.Name).ToListAsync();
 
-            // Toplam istatistikler için ayrı sorgular
-            var totalStudents = await _db.Students.CountAsync();
-            var activeStudents = await _db.Students.CountAsync(s => s.IsActive);
+            // Toplam istatistikler
+            var totalStudents = students.Count;
+            var activeStudents = students.Count(s => s.IsActive);
             var inactiveStudents = totalStudents - activeStudents;
-
-            // Filtreli istatistikler
-            var filteredActiveStudents = await query.CountAsync(s => s.IsActive);
-            var filteredInactiveStudents = total - filteredActiveStudents;
 
             var vm = new StudentListVm
             {
-                Students = items.Select(s => new StudentListItemVm
+                Students = students.Select(s => new StudentListItemVm
                 {
                     StudentId = s.Id,
                     GroupId = s.GroupId,
                     FullName = s.FullName,
                     StudentNumber = s.StudentNumber,
-                    IsActive = s.IsActive
+                    IsActive = s.IsActive,
+                    GroupName = s.Group?.Name ?? ""
                 }).ToList(),
                 Groups = groups.Select(g => new GroupSelectItemVm
                 {
@@ -355,15 +338,9 @@ namespace Yoklama.Controllers
                     Name = g.Name,
                     Code = g.Code
                 }).ToList(),
-                SelectedGroupId = groupId,
-                Search = search,
-                Page = page,
-                PageSize = pageSize,
-                TotalCount = total,
-                // İstatistikler - filtre varsa filtreli, yoksa toplam
-                TotalStudentsCount = string.IsNullOrWhiteSpace(search) && !groupId.HasValue ? totalStudents : total,
-                ActiveStudentsCount = string.IsNullOrWhiteSpace(search) && !groupId.HasValue ? activeStudents : filteredActiveStudents,
-                InactiveStudentsCount = string.IsNullOrWhiteSpace(search) && !groupId.HasValue ? inactiveStudents : filteredInactiveStudents
+                TotalStudentsCount = totalStudents,
+                ActiveStudentsCount = activeStudents,
+                InactiveStudentsCount = inactiveStudents
             };
 
             return View(vm);

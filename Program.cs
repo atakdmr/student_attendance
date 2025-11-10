@@ -8,6 +8,53 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 
+// ✅ OPTIMIZATION: Output caching ekle
+builder.Services.AddOutputCache(options =>
+{
+    // Base policy: Tüm sayfalar için cache aktif
+    options.AddBasePolicy(builder => 
+        builder.Expire(TimeSpan.FromMinutes(5))
+               .Tag("page-cache"));
+    
+    // Dashboard için özel policy (daha kısa cache)
+    options.AddPolicy("dashboard", builder => 
+        builder.Expire(TimeSpan.FromMinutes(2))
+               .Tag("dashboard-cache"));
+    
+    // Static data için daha uzun cache
+    options.AddPolicy("static-data", builder => 
+        builder.Expire(TimeSpan.FromMinutes(30))
+               .Tag("static-cache"));
+});
+
+// ✅ OPTIMIZATION: Rate limiting ekle (DDoS koruması) - sadece production'da
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddRateLimiter(options =>
+    {
+        // Global fallback policy - IP bazlı rate limiting
+        options.GlobalLimiter = System.Threading.RateLimiting.PartitionedRateLimiter.Create<Microsoft.AspNetCore.Http.HttpContext, string>(context =>
+        {
+            var userName = context.User.Identity?.Name;
+            var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var partitionKey = userName ?? remoteIp;
+            
+            return System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: partitionKey,
+                factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 1000, // Dakikada 1000 istek (çok daha yüksek)
+                    QueueLimit = 0,
+                    Window = TimeSpan.FromMinutes(1)
+                });
+        });
+        
+        // Rate limit aşıldığında döndürülecek durum kodu
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    });
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -22,9 +69,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied";
         options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromHours(24); // Cookie 24 saat geçerli
         options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
         options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.SameSite = builder.Environment.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.Strict;
+        options.Cookie.IsEssential = true; // Cookie consent'e gerek yok
         options.Events = new CookieAuthenticationEvents
         {
             OnRedirectToLogin = context =>
@@ -73,18 +122,74 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
     app.UseHttpsRedirection();
 }
+
+// ✅ OPTIMIZATION: Sadece HTML sayfalar için cache kapatıldı, static dosyalar için korundu
 app.Use(async (context, next) =>
 {
-    context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
-    context.Response.Headers.Append("Pragma", "no-cache");
-    context.Response.Headers.Append("Expires", "0");
+    // Static asset path'leri için cache açık bırak
+    var path = context.Request.Path.Value?.ToLowerInvariant();
+    var isStaticAsset = path != null && (
+        path.StartsWith("/css") ||
+        path.StartsWith("/js") ||
+        path.StartsWith("/lib") ||
+        path.StartsWith("/images") ||
+        path.EndsWith(".css") ||
+        path.EndsWith(".js") ||
+        path.EndsWith(".jpg") ||
+        path.EndsWith(".jpeg") ||
+        path.EndsWith(".png") ||
+        path.EndsWith(".gif") ||
+        path.EndsWith(".svg") ||
+        path.EndsWith(".woff") ||
+        path.EndsWith(".woff2") ||
+        path.EndsWith(".ttf") ||
+        path.EndsWith(".ico")
+    );
+
+    if (!isStaticAsset)
+    {
+        // Sadece HTML sayfalar için cache kapatılsın
+        context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+        context.Response.Headers.Append("Pragma", "no-cache");
+        context.Response.Headers.Append("Expires", "0");
+    }
+    
+    // Güvenlik header'ları tüm response'lar için
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
     context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    
     await next();
 });
 
+// ✅ OPTIMIZATION: Static files için cache headers ayarlandı (Authentication'dan ÖNCE)
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // 1 yıl (31536000 saniye) cache süresi
+        if (!app.Environment.IsDevelopment())
+        {
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000,immutable");
+        }
+        else
+        {
+            // Development'ta daha kısa cache
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=3600");
+        }
+    }
+});
+
 app.UseRouting();
+
+// ✅ OPTIMIZATION: Rate limiter middleware (sadece production'da)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseRateLimiter();
+}
+
+// ✅ OPTIMIZATION: Output caching middleware
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
