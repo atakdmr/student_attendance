@@ -1,39 +1,32 @@
 {
   "format": 1,
   "restore": {
-<<<<<<< HEAD
-    "C:\\Users\\akdem\\OneDrive\\Desktop\\apps\\OneDrive\\Desktop\\everything\\projects\\attendance\\Yoklama.csproj": {}
+    "C:\\Users\\akdem\\Desktop\\everything\\vscode\\attendance\\student_attendance\\Yoklama.csproj": {}
   },
   "projects": {
-    "C:\\Users\\akdem\\OneDrive\\Desktop\\apps\\OneDrive\\Desktop\\everything\\projects\\attendance\\Yoklama.csproj": {
+    "C:\\Users\\akdem\\Desktop\\everything\\vscode\\attendance\\student_attendance\\Yoklama.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\akdem\\OneDrive\\Desktop\\apps\\OneDrive\\Desktop\\everything\\projects\\attendance\\Yoklama.csproj",
+        "projectUniqueName": "C:\\Users\\akdem\\Desktop\\everything\\vscode\\attendance\\student_attendance\\Yoklama.csproj",
         "projectName": "Yoklama",
-        "projectPath": "C:\\Users\\akdem\\OneDrive\\Desktop\\apps\\OneDrive\\Desktop\\everything\\projects\\attendance\\Yoklama.csproj",
+        "projectPath": "C:\\Users\\akdem\\Desktop\\everything\\vscode\\attendance\\student_attendance\\Yoklama.csproj",
         "packagesPath": "C:\\Users\\akdem\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\akdem\\OneDrive\\Desktop\\apps\\OneDrive\\Desktop\\everything\\projects\\attendance\\obj\\",
-=======
-    "C:\\Users\\akdem\\OneDrive\\Desktop\\attendance\\Yoklama.csproj": {}
-  },
-  "projects": {
-    "C:\\Users\\akdem\\OneDrive\\Desktop\\attendance\\Yoklama.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "C:\\Users\\akdem\\OneDrive\\Desktop\\attendance\\Yoklama.csproj",
-        "projectName": "Yoklama",
-        "projectPath": "C:\\Users\\akdem\\OneDrive\\Desktop\\attendance\\Yoklama.csproj",
-        "packagesPath": "C:\\Users\\akdem\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\akdem\\OneDrive\\Desktop\\attendance\\obj\\",
->>>>>>> e72c5c9fb8f4b62db6fb8792aa2d6c19ddd4345d
+        "outputPath": "C:\\Users\\akdem\\Desktop\\everything\\vscode\\attendance\\student_attendance\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\akdem\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\akdem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -52,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net9.0": {
@@ -67,10 +60,6 @@
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
-              "target": "Package",
-              "version": "[9.0.9, )"
-            },
-            "Microsoft.Extensions.Identity.Core": {
               "target": "Package",
               "version": "[9.0.9, )"
             },
@@ -90,6 +79,24 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[9.0.14, 9.0.14]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[9.0.14, 9.0.14]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[9.0.14, 9.0.14]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[9.0.14, 9.0.14]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -98,7 +105,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

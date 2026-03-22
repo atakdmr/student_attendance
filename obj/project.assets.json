@@ -15,35 +15,6 @@
           }
         }
       },
-      "Microsoft.AspNetCore.Cryptography.Internal/9.0.9": {
-        "type": "package",
-        "compile": {
-          "lib/net9.0/Microsoft.AspNetCore.Cryptography.Internal.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net9.0/Microsoft.AspNetCore.Cryptography.Internal.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "Microsoft.AspNetCore.Cryptography.KeyDerivation/9.0.9": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.AspNetCore.Cryptography.Internal": "9.0.9"
-        },
-        "compile": {
-          "lib/net9.0/Microsoft.AspNetCore.Cryptography.KeyDerivation.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net9.0/Microsoft.AspNetCore.Cryptography.KeyDerivation.dll": {
-            "related": ".xml"
-          }
-        }
-      },
       "Microsoft.Bcl.AsyncInterfaces/7.0.0": {
         "type": "package",
         "compile": {
@@ -597,24 +568,6 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
-      "Microsoft.Extensions.Identity.Core/9.0.9": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.AspNetCore.Cryptography.KeyDerivation": "9.0.9",
-          "Microsoft.Extensions.Logging": "9.0.9",
-          "Microsoft.Extensions.Options": "9.0.9"
-        },
-        "compile": {
-          "lib/net9.0/Microsoft.Extensions.Identity.Core.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net9.0/Microsoft.Extensions.Identity.Core.dll": {
-            "related": ".xml"
-          }
-        }
-      },
       "Microsoft.Extensions.Logging/9.0.9": {
         "type": "package",
         "dependencies": {
@@ -984,44 +937,6 @@
         "lib/netstandard2.0/Humanizer.dll",
         "lib/netstandard2.0/Humanizer.xml",
         "logo.png"
-      ]
-    },
-    "Microsoft.AspNetCore.Cryptography.Internal/9.0.9": {
-      "sha512": "1ZKxBYg9d+pQS+oBEpHzCPLlKMN/MmCcESLvadcScjovVynTa52Q/1N8B0pn6N+MaWjEYw+YazEwTOI3zYOx8A==",
-      "type": "package",
-      "path": "microsoft.aspnetcore.cryptography.internal/9.0.9",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net462/Microsoft.AspNetCore.Cryptography.Internal.dll",
-        "lib/net462/Microsoft.AspNetCore.Cryptography.Internal.xml",
-        "lib/net9.0/Microsoft.AspNetCore.Cryptography.Internal.dll",
-        "lib/net9.0/Microsoft.AspNetCore.Cryptography.Internal.xml",
-        "lib/netstandard2.0/Microsoft.AspNetCore.Cryptography.Internal.dll",
-        "lib/netstandard2.0/Microsoft.AspNetCore.Cryptography.Internal.xml",
-        "microsoft.aspnetcore.cryptography.internal.9.0.9.nupkg.sha512",
-        "microsoft.aspnetcore.cryptography.internal.nuspec"
-      ]
-    },
-    "Microsoft.AspNetCore.Cryptography.KeyDerivation/9.0.9": {
-      "sha512": "iGru/4hTzcOYl6KQskvzyzYsGEbS7Rj+TfknIqDQZvgeGoxB61yEgypmomGz4pepBBFURkfnQLZJWaJtqlmy+g==",
-      "type": "package",
-      "path": "microsoft.aspnetcore.cryptography.keyderivation/9.0.9",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net462/Microsoft.AspNetCore.Cryptography.KeyDerivation.dll",
-        "lib/net462/Microsoft.AspNetCore.Cryptography.KeyDerivation.xml",
-        "lib/net9.0/Microsoft.AspNetCore.Cryptography.KeyDerivation.dll",
-        "lib/net9.0/Microsoft.AspNetCore.Cryptography.KeyDerivation.xml",
-        "lib/netstandard2.0/Microsoft.AspNetCore.Cryptography.KeyDerivation.dll",
-        "lib/netstandard2.0/Microsoft.AspNetCore.Cryptography.KeyDerivation.xml",
-        "microsoft.aspnetcore.cryptography.keyderivation.9.0.9.nupkg.sha512",
-        "microsoft.aspnetcore.cryptography.keyderivation.nuspec"
       ]
     },
     "Microsoft.Bcl.AsyncInterfaces/7.0.0": {
@@ -2279,25 +2194,6 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.Identity.Core/9.0.9": {
-      "sha512": "SGLETUVrC16OJJ04cUtxLdxr6WzdSPd7XsMqJqMi96UL4DWPjfeZAyYNETA4qbvnJm1/tf1/xvel7xm5o2mQwQ==",
-      "type": "package",
-      "path": "microsoft.extensions.identity.core/9.0.9",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net462/Microsoft.Extensions.Identity.Core.dll",
-        "lib/net462/Microsoft.Extensions.Identity.Core.xml",
-        "lib/net9.0/Microsoft.Extensions.Identity.Core.dll",
-        "lib/net9.0/Microsoft.Extensions.Identity.Core.xml",
-        "lib/netstandard2.0/Microsoft.Extensions.Identity.Core.dll",
-        "lib/netstandard2.0/Microsoft.Extensions.Identity.Core.xml",
-        "microsoft.extensions.identity.core.9.0.9.nupkg.sha512",
-        "microsoft.extensions.identity.core.nuspec"
-      ]
-    },
     "Microsoft.Extensions.Logging/9.0.9": {
       "sha512": "MaCB0Y9hNDs4YLu3HCJbo199WnJT8xSgajG1JYGANz9FkseQ5f3v/llu3HxLI6mjDlu7pa7ps9BLPWjKzsAAzQ==",
       "type": "package",
@@ -2926,37 +2822,36 @@
     "net9.0": [
       "Microsoft.EntityFrameworkCore.Design >= 9.0.9",
       "Microsoft.EntityFrameworkCore.Tools >= 9.0.9",
-      "Microsoft.Extensions.Identity.Core >= 9.0.9",
       "Pomelo.EntityFrameworkCore.MySql >= 9.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\akdem\\.nuget\\packages\\": {}
+    "C:\\Users\\akdem\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-<<<<<<< HEAD
-      "projectUniqueName": "C:\\Users\\akdem\\OneDrive\\Desktop\\apps\\OneDrive\\Desktop\\everything\\projects\\attendance\\Yoklama.csproj",
+      "projectUniqueName": "C:\\Users\\akdem\\Desktop\\everything\\vscode\\attendance\\student_attendance\\Yoklama.csproj",
       "projectName": "Yoklama",
-      "projectPath": "C:\\Users\\akdem\\OneDrive\\Desktop\\apps\\OneDrive\\Desktop\\everything\\projects\\attendance\\Yoklama.csproj",
+      "projectPath": "C:\\Users\\akdem\\Desktop\\everything\\vscode\\attendance\\student_attendance\\Yoklama.csproj",
       "packagesPath": "C:\\Users\\akdem\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\akdem\\OneDrive\\Desktop\\apps\\OneDrive\\Desktop\\everything\\projects\\attendance\\obj\\",
-=======
-      "projectUniqueName": "C:\\Users\\akdem\\OneDrive\\Desktop\\attendance\\Yoklama.csproj",
-      "projectName": "Yoklama",
-      "projectPath": "C:\\Users\\akdem\\OneDrive\\Desktop\\attendance\\Yoklama.csproj",
-      "packagesPath": "C:\\Users\\akdem\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\akdem\\OneDrive\\Desktop\\attendance\\obj\\",
->>>>>>> e72c5c9fb8f4b62db6fb8792aa2d6c19ddd4345d
+      "outputPath": "C:\\Users\\akdem\\Desktop\\everything\\vscode\\attendance\\student_attendance\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\akdem\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\akdem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -2975,7 +2870,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.200"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net9.0": {
@@ -2990,10 +2885,6 @@
           "Microsoft.EntityFrameworkCore.Tools": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",
-            "target": "Package",
-            "version": "[9.0.9, )"
-          },
-          "Microsoft.Extensions.Identity.Core": {
             "target": "Package",
             "version": "[9.0.9, )"
           },
@@ -3013,6 +2904,24 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[9.0.14, 9.0.14]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[9.0.14, 9.0.14]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[9.0.14, 9.0.14]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[9.0.14, 9.0.14]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -3021,7 +2930,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
